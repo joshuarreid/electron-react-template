@@ -1,70 +1,177 @@
-# Getting Started with Create React App
+# Electron + Create React App Template
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A polished, fork-ready template that combines Create React App (CRA) for the renderer with Electron for the desktop shell. Designed to be cloned/forked and quickly bootstrapped into a working desktop application with IPC, development tooling, and packaging for macOS & Windows.
 
-## Available Scripts
+## Badges
+- Status: Ready for fork
+- Platform: macOS / Windows / Linux
+- Stack: React (CRA) + Electron + electron-builder
 
-In the project directory, you can run:
+## Table of contents
+- [Quick start](#quick-start)
+- [Pinned versions (recommended)](#pinned-versions-recommended)
+- [What to change after forking](#what-to-change-after-forking)
+- [Scripts & workflow](#scripts--workflow)
+- [Verify IPC (preload → main)](#verify-ipc-preload--main)
+- [Packaging & build notes](#packaging--build-notes)
+- [Common issues & fixes](#common-issues--fixes)
+- [CI / Releases recommendations](#ci--releases-recommendations)
+- [Security & best practices](#security--best-practices)
+- [Contributing & licensing](#contributing--licensing)
+- [Quick troubleshooting checklist](#quick-troubleshooting-checklist)
 
-### `npm start`
+## Quick start
+1. Fork or clone your copy:
+   - git clone git@github.com:YOUR_USER/YOUR_FORK.git
+   - cd YOUR_FORK
+2. Install dependencies:
+   - npm install
+3. Run development (CRA + Electron):
+   - npm run electron-dev
+4. Verify:
+   - Electron window appears (DevTools open in dev).
+   - Click "Ping Main" in the UI — you should see a JSON pong reply from the main process.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Pinned versions (recommended)
+- Purpose: Keep this section up-to-date in the repo so future forks and CI use known-good versions. Use exact versions in your package manager (package.json / pom.xml / build.gradle) or lockfiles.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project README / Template (this file)
+- README version: 2025-10-18 (update date each time you change requirements)
 
-### `npm test`
+## Frontend / Electron template (Node + CRA)
+- Node.js: 18.x LTS (recommended minimum) — e.g., 18.16.x
+- npm: 9.x
+- react: 18.2.0
+- react-dom: 18.2.0
+- react-scripts: 5.0.1
+- electron: 28.0.0
+- electron-builder: 24.9.1
+- concurrently: 8.2.2
+- wait-on: 7.2.0
+- music-metadata (if used): 7.13.0
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Backend / Statement-Based Budgeting Microservice (Java / Spring Boot)
+- Java (JDK): 17 (LTS) minimum — use 17 for widest compatibility; consider 21 if your infra and libraries support it
+- Spring Boot: 3.1.x (use the latest 3.1 patch available at time of fork)
+- Hibernate (via Spring Boot): Hibernate 6.x
+- MySQL Server: 8.0.x
+- Jackson (JSON): as provided by Spring Boot 3.1.x (2.14+)
+- SLF4J (API): 2.0.x
+- Logback (implementation): 1.4.x
+- JUnit Jupiter: 5.9.x
+- Testcontainers: 1.18.x (for integration tests)
 
-### `npm run build`
+## Database / Schema
+- MySQL schema version: 2025-10-18_v1 (keep a schema/version stamp in migrations)
+- Use migration tool: Flyway or Liquibase (pin to a release, e.g., Flyway 9.x or Liquibase 4.x)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## CI / Build tools
+- Maven: 3.8.x or newer (if using Maven)
+- Gradle: 8.x or newer (if using Gradle)
+- GitHub Actions runners:
+  - ubuntu-latest (for Linux artifacts)
+  - macos-latest (for macOS artifacts)
+  - windows-latest (for Windows/NSIS builds)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## What to change after forking (short checklist)
+- package.json
+  - Update "name", "version", "author".
+  - Set `"appId"` and `"productName"` under the `build` section.
+- Branding & assets
+  - Replace icons in `public/assets/`:
+    - mac: `app.icns`
+    - windows: `app.ico`
+- README / LICENSE
+  - Update the project description, add screenshots, and choose a license (MIT recommended).
+- CI and secrets
+  - Add GitHub Actions or your CI config; do not commit secrets. Use GitHub Secrets / environment variables.
+- Security review
+  - Review `public/preload.js` to ensure only needed APIs are exposed.
 
-### `npm run eject`
+## Scripts & workflow
+- npm start
+  - Starts CRA dev server at http://localhost:3000
+- npm run electron
+  - Launch Electron using `main` from package.json (e.g., `public/electron.js`)
+- npm run electron-dev
+  - Development helper: runs CRA and launches Electron after the dev server is ready
+- npm run build
+  - Builds the CRA renderer into `build/`
+- npm run dist
+  - Builds renderer then runs electron-builder (packages current OS)
+- npm run dist-mac
+  - Package macOS build
+- npm run dist-win
+  - Package Windows NSIS installer (run on Windows or use Windows CI runner)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Verify IPC (preload → main)
+- The template exposes a small secure API via `contextBridge`:
+  - `window.electronAPI.ping(payload)` — quick round-trip sanity check
+  - `window.electronAPI.selectDestinationFolder()` — opens native folder chooser
+  - `window.electronAPI.transferAlbums(payload)` — starts a simulated transfer (template)
+  - `window.electronAPI.onTransferProgress(cb)` — subscribe to progress events
+- Quick manual test:
+  - Open the app and click the "Ping Main" button; verify the pong JSON appears.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Packaging & build notes
+- Output directory: `dist/` per `build.directories.output`
+- Ensure icons exist before packaging:
+  - mac: `public/assets/app.icns`
+  - windows: `public/assets/app.ico`
+- electron-builder:
+  - Default behaviour is to package the files listed in `build.files`. If you relocate electron files, update `main` and `build.files`.
+- Windows builds:
+  - `dist-win` uses `--win` (NSIS). Build locally on Windows or configure CI with a Windows runner for reliable artifacts.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Common issues & fixes
+- Electron can't find module / "cannot find module '<project-dir>'"
+  - Ensure package.json `main` points to `public/electron.js` and that file exists.
+- ERR_REQUIRE_ESM from `electron-is-dev`
+  - Use the included isDev heuristic (recommended) or change to dynamic import. Avoid flipping the repo to ESM (`"type": "module"`) unless you're ready to migrate all code.
+- CRA: "Can't resolve 'web-vitals'"
+  - Install web-vitals: `npm install web-vitals`
+  - Or keep the provided `src/reportWebVitals.js` no-op stub in the template.
+- window.electronAPI undefined in renderer
+  - Confirm `preload` path in `public/electron.js` → `webPreferences.preload`.
+  - Ensure `contextIsolation: true` and `nodeIntegration: false` match the preload's assumptions.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## CI / Releases recommendations
+- Add GitHub Actions:
+  - Lint, test, build renderer
+  - Build platform-specific installers on the correct OS runners:
+    - macOS runner → mac artifacts
+    - Windows runner → NSIS installer
+- Tag releases and attach artifacts from CI
+- Code signing & notarization:
+  - macOS notarization and Windows code signing are recommended for production builds
 
-## Learn More
+## Security & best practices
+- Preload API:
+  - Expose minimal methods only; validate inputs in main when performing filesystem or privileged operations
+- Context isolation:
+  - Keep `contextIsolation: true` and `nodeIntegration: false`
+- Replace console logs with `electron-log` before packaging to capture persistent logs
+- Validate and sanitize all data coming from renderer before passing to fs or OS operations
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Contributing & licensing
+- Fork → feature branch → PR to your repo (or upstream if applicable)
+- Add tests for new functionality — unit tests for services and integration tests for IPC flows
+- Include a LICENSE (MIT recommended) and CONTRIBUTING guidelines for your project
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Quick troubleshooting checklist
+- Did npm install complete without errors?
+- Is `public/electron.js` present and `main` pointing to it?
+- Is the CRA dev server accessible at http://localhost:3000?
+- If packaging fails, run electron-builder with `--debug` or inspect the `dist/` logs.
+- For IPC issues: open DevTools in the renderer and check for `window.electronAPI` in the console.
 
-### Code Splitting
+## Appendix: Useful commands
+- Install deps: npm install
+- Run dev (CRA + Electron): npm run electron-dev
+- Build renderer: npm run build
+- Run packaged local electron: npm run electron
+- Package (current OS): npm run dist
+- Package Windows (NSIS): npm run dist-win
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Happy hacking! 🚀
