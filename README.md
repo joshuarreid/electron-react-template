@@ -48,7 +48,7 @@ A polished, fork-ready template that combines Create React App (CRA) for the ren
 - electron-builder: 24.9.1
 - concurrently: 8.2.2
 - wait-on: 7.2.0
-- music-metadata (if used): 7.13.0
+
 
 
 ## What to change after forking (short checklist)
