@@ -50,29 +50,6 @@ A polished, fork-ready template that combines Create React App (CRA) for the ren
 - wait-on: 7.2.0
 - music-metadata (if used): 7.13.0
 
-## Backend / Statement-Based Budgeting Microservice (Java / Spring Boot)
-- Java (JDK): 17 (LTS) minimum — use 17 for widest compatibility; consider 21 if your infra and libraries support it
-- Spring Boot: 3.1.x (use the latest 3.1 patch available at time of fork)
-- Hibernate (via Spring Boot): Hibernate 6.x
-- MySQL Server: 8.0.x
-- Jackson (JSON): as provided by Spring Boot 3.1.x (2.14+)
-- SLF4J (API): 2.0.x
-- Logback (implementation): 1.4.x
-- JUnit Jupiter: 5.9.x
-- Testcontainers: 1.18.x (for integration tests)
-
-## Database / Schema
-- MySQL schema version: 2025-10-18_v1 (keep a schema/version stamp in migrations)
-- Use migration tool: Flyway or Liquibase (pin to a release, e.g., Flyway 9.x or Liquibase 4.x)
-
-## CI / Build tools
-- Maven: 3.8.x or newer (if using Maven)
-- Gradle: 8.x or newer (if using Gradle)
-- GitHub Actions runners:
-  - ubuntu-latest (for Linux artifacts)
-  - macos-latest (for macOS artifacts)
-  - windows-latest (for Windows/NSIS builds)
-
 
 ## What to change after forking (short checklist)
 - package.json
